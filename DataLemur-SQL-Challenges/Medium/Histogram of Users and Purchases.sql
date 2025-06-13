@@ -1,17 +1,15 @@
-WITH CTE AS
-(
-    SELECT user_id, 
-           transaction_date,
-           product_id,
-           DENSE_RANK() OVER(PARTITION BY user_id ORDER BY transaction_date DESC) AS rank
-           
-    FROM user_transactions
+WITH latest_txn AS (
+  SELECT user_id, MAX(transaction_date) AS max_txn_date
+  FROM user_transactions
+  GROUP BY user_id
 )
 
-SELECT transaction_date,
-       user_id,
-       COUNT(product_id) AS purchase_count
-FROM CTE
-WHERE rank = 1
-GROUP BY transaction_date, user_id
-ORDER BY transaction_date
+SELECT 
+  t.transaction_date,
+  t.user_id,
+  COUNT(*) AS purchase_count
+FROM user_transactions t
+JOIN latest_txn l
+  ON t.user_id = l.user_id AND t.transaction_date = l.max_txn_date
+GROUP BY t.user_id, t.transaction_date
+ORDER BY t.transaction_date;

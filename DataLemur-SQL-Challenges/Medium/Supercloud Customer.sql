@@ -1,18 +1,7 @@
-WITH SuperCloud AS
-(
-
-  SELECT customer_id, 
-         COUNT(DISTINCT products.product_category) AS NumberOfProducts
-  FROM customer_contracts
-  RIGHT JOIN products
-  ON customer_contracts.product_id = products.product_id
-  GROUP BY customer_id
-)
-
-SELECT customer_id
-FROM SuperCloud
-WHERE NumberOfProducts = 
-        (
-          SELECT COUNT(DISTINCT product_category) 
-          FROM products
-        )
+SELECT c.customer_id
+FROM customer_contracts as c
+join  products as p 
+on c.product_id= p.product_id
+group by c.customer_id
+having count(distinct p.product_category) =
+(select count(distinct product_category) from products);

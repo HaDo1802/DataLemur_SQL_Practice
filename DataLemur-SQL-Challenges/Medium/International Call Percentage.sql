@@ -1,19 +1,6 @@
-WITH International_Call AS 
-(
-  SELECT SUM(
-              CASE WHEN caller.country_id !=  receiver.country_id THEN 1.0
-              ELSE 0.0 END
-            ) AS Number_internationals
-  FROM phone_calls AS pc
-  INNER JOIN phone_info AS caller
-  ON pc.caller_id = caller.caller_id
-  INNER JOIN phone_info AS receiver
-  ON pc.receiver_id = receiver.caller_id
-)
-
-
-SELECT ROUND(
-               (Number_internationals * 100 / (SELECT COUNT(*) FROM phone_calls))
-               , 1
-            )
-FROM International_Call
+SELECT round(100*avg(case when p2.country_id !=p3.country_id then 1 else 0 end),1) as international_calls_pct
+FROM phone_calls p1
+join phone_info p2
+on p1.caller_id	= p2.caller_id
+join phone_info p3
+on p1.receiver_id	= p3.caller_id;
